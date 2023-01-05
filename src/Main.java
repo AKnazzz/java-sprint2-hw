@@ -1,8 +1,7 @@
-import java.util.Scanner; // импортируем сканер
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        // Поехали!
 
         Scanner scanner = new Scanner(System.in);
 
@@ -25,7 +24,7 @@ public class Main {
 
             } else if (userInput == 3) {                                            // ("3 - Сверить отчёты");
 
-                checker.checker(monthlyManager, yearlyManager);
+                checker.check(monthlyManager, yearlyManager);
 
             } else if (userInput == 4) {                                            // ("4 - Вывести информацию о всех месячных отчётах");
                 if (monthlyManager.checkLoad()) {
@@ -55,12 +54,5 @@ public class Main {
         System.out.println("4 - Вывести информацию о всех месячных отчётах");
         System.out.println("5 - Вывести информацию о годовом отчёте");
         System.out.println("0 - Закончить работу");
-
     }
 }
-
-
-
-
-
-

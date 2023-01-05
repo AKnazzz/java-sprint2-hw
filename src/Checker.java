@@ -1,5 +1,5 @@
 public class Checker {                                                                       // класс для сверки отчетов
-    public void checker(MonthlyReport monthlyReport, YearlyReport yearlyReport) {            //метод проверки, что файлы считаны и сохранены
+    public void check(MonthlyReport monthlyReport, YearlyReport yearlyReport) {            //метод проверки, что файлы считаны и сохранены
 
 
         if (yearlyReport.yearReport.isEmpty()) {                                             // условие загрузки годового файла
@@ -11,7 +11,7 @@ public class Checker {                                                          
             return;
         }
 
-        byte errors = 0;                                                                    // переменная для сохранения кол-ва ошибок при сверке
+        boolean errors = false;                                                                    // переменная для сохранения кол-ва ошибок при сверке
 
         // методы для расчета доходов и расходов уже были созданы внутри соответствующих классов - используем их для сравнения сумм
         // используем эти методы в цикле - получаем значения по каждому месяцу из месячного и годового отчета
@@ -22,16 +22,17 @@ public class Checker {                                                          
 
             if (!isLossEqual) {
                 System.out.println("ОШИБКА! Расхождение по расходам в месяце №" + i);
-                errors++;
+                errors = true;
             }
             if (!isProfitEqual) {
                 System.out.println("ОШИБКА! Расхождение по доходам в месяце №" + i);
-                errors++;
+                errors = true;
             }
         }
-        if (errors == 0) {
+        if (errors == false) {
             System.out.println("Отчеты успешно сверены - расхождений в данных не обнаружено !");
         }
+        errors = false;                                                                         // возвращаем исходное значение переменной (чтоб при повторном вызове метод)
     }
 
 }

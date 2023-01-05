@@ -32,6 +32,7 @@ public class MonthlyReport { // класс = для хранения данны�
     }
 
     public void loadAllMonth() {                    // метод для извлечения и сохранения данных за три месяц
+        monthReportData.clear();
         for (int i = 1; i <= 3; i++) {
             String path = "resources/m.20210" + i + ".csv";
             loadFile(i, path);
@@ -94,22 +95,13 @@ public class MonthlyReport { // класс = для хранения данны�
     }
 
 
-    public int topOrder(HashMap<String, Integer> freqs) {                  // метод получения имени самого дорогого/расходного продукта
-        String topName = null;                                             //(в зависимости от начальных условий)
-        for (String saleName : freqs.keySet()) {
-            if (topName == null) {
-                topName = saleName;
-                continue;
-            }
-            if (freqs.get(topName) < freqs.get(saleName)) {
-                topName = saleName;
-            }
-        }
-        return freqs.get(topName);                                         // возвращаем стоимость самого дорогого/ расходного продукта
+    public int getTopProductCost(HashMap<String, Integer> freqs) {       // метод получения стоимости самого прибыльного/расходного продукта (в зависимости от начальных условий)
+        int topCost = freqs.get(topName(freqs));                        // используем метод topName (для избежания повторения кода)
+        return topCost;                                                 // возвращаем стоимость самого дорогого/ расходного продукта
     }
 
 
-    public boolean checkLoad() {                                           // метод проверки перед выводом статистики, что отчеты загружены
+    public boolean checkLoad() {                                           // метод общей проверки перед выводом статистики
         if (monthReportData.isEmpty()) {
             System.out.println("Отчеты не загружены - считайте файлы (команда 1).");
             return false;
@@ -118,15 +110,35 @@ public class MonthlyReport { // класс = для хранения данны�
         }
     }
 
+    public boolean checkLoadOneReport(int month) {                          // метод проверки загрузки/заполнения данными отчета каждого месяца
+        boolean report = true;
+        if (topSaleName(month, true).isEmpty() & topSaleName(month, false).isEmpty()) {
+            report = false;
+        }
+        return report;
+    }
 
-    public void printMonthStats(Integer month) {                            // метод вывода статистики за каждый месяц
 
-        System.out.println("Вывод статистики за " + month + " месяц: ");
-        System.out.print("Самый прибыльный продукт в " + month + " месяце: " + topName(topSaleName(month, false)));
-        System.out.println(". Сумма продаж : " + topOrder(topSaleName(month, false)) + " рублей.");
-        System.out.print("Самая большая расходы на продукт: " + topName(topSaleName(month, true)) + " рублей.");
-        System.out.println("Сумма израсходованных средств: " + topOrder(topSaleName(month, true)) + " рублей.");
-
+    public void printMonthStats(Integer month) {                            // метод вывода статистики за каждый месяц (доработан для большей информативности пользователю)
+        if (checkLoadOneReport(month)) {                                    // проверка условия полного отсутствия данных в файле
+            System.out.println("Вывод статистики за " + month + " месяц: ");
+            if (topSaleName(month, true).isEmpty()) {               // проверка отсутствия данных по расходам + вывод возможной информации по месяцу
+                System.out.println("Внимание! В отчете за месяц " + month + " отсутствуют данные по расходам.");
+                System.out.print("Самый прибыльный продукт в " + month + " месяце: " + topName(topSaleName(month, false)));
+                System.out.println(". Сумма продаж : " + getTopProductCost(topSaleName(month, false)) + " рублей.");
+            } else if (topSaleName(month, false).isEmpty()) {       // проверка отсутствия данных по доходам + вывод возможной информации по месяцу
+                System.out.println("Внимание! В отчете за месяц " + month + " отсутствуют данные по доходам.");
+                System.out.print("Самая большая расходы на продукт: " + topName(topSaleName(month, true)) + " рублей.");
+                System.out.println("Сумма израсходованных средств: " + getTopProductCost(topSaleName(month, true)) + " рублей.");
+            } else {
+                System.out.print("Самый прибыльный продукт в " + month + " месяце: " + topName(topSaleName(month, false)));
+                System.out.println(". Сумма продаж : " + getTopProductCost(topSaleName(month, false)) + " рублей.");
+                System.out.print("Самая большая расходы на продукт: " + topName(topSaleName(month, true)) + " рублей.");
+                System.out.println("Сумма израсходованных средств: " + getTopProductCost(topSaleName(month, true)) + " рублей.");
+            }
+        } else {
+            System.out.println("Внимание! Файл отчета за " + month + " месяц отсутствует или не заполнен!");
+        }
     }
 
 }
