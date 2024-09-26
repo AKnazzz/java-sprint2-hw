@@ -1,38 +1,39 @@
-public class Checker {                                                                       // класс для сверки отчетов
-    public void check(MonthlyReport monthlyReport, YearlyReport yearlyReport) {            //метод проверки, что файлы считаны и сохранены
+public class Checker { // Класс для сверки отчетов
 
+    public void check(MonthlyReport monthlyReport, YearlyReport yearlyReport) { // Метод проверки, что файлы считаны и сохранены
 
-        if (yearlyReport.yearReport.isEmpty()) {                                             // условие загрузки годового файла
+        // Проверяем загрузку годового отчета
+        if (yearlyReport.getYearReport().isEmpty()) {
             System.out.println("Годовой отчет не загружен - считайте файл (команда 2).");
             return;
         }
-        if (monthlyReport.monthReportData.isEmpty()) {                                      // условие загрузки месячных файлов
+
+        // Проверяем загрузку месячных отчетов
+        if (monthlyReport.getMonthReportData().isEmpty()) {
             System.out.println("Отчеты не загружены - считайте файлы (команда 1).");
             return;
         }
 
-        boolean errors = false;                                                                    // переменная для сохранения кол-ва ошибок при сверке
+        boolean hasErrors = false; // Переменная для отслеживания ошибок при сверке
 
-        // методы для расчета доходов и расходов уже были созданы внутри соответствующих классов - используем их для сравнения сумм
-        // используем эти методы в цикле - получаем значения по каждому месяцу из месячного и годового отчета
-
-        for (int i = 1; i <= 3; i++) {                                                      //цикл для сравнения
-            boolean isProfitEqual = (monthlyReport.monthExpenses(monthlyReport.topSaleName(i, false)).equals(yearlyReport.getMonthProfit(i)));
-            boolean isLossEqual = (monthlyReport.monthExpenses(monthlyReport.topSaleName(i, true)).equals(yearlyReport.getMonthLoss(i)));
+        // Сравниваем данные за первые три месяца
+        for (int month = 1; month <= 3; month++) {
+            boolean isProfitEqual = monthlyReport.monthExpenses(monthlyReport.topSaleName(month, false)).equals(yearlyReport.getMonthProfit(month));
+            boolean isLossEqual = monthlyReport.monthExpenses(monthlyReport.topSaleName(month, true)).equals(yearlyReport.getMonthLoss(month));
 
             if (!isLossEqual) {
-                System.out.println("ОШИБКА! Расхождение по расходам в месяце №" + i);
-                errors = true;
+                System.out.println("ОШИБКА! Расхождение по расходам в месяце №" + month);
+                hasErrors = true;
             }
             if (!isProfitEqual) {
-                System.out.println("ОШИБКА! Расхождение по доходам в месяце №" + i);
-                errors = true;
+                System.out.println("ОШИБКА! Расхождение по доходам в месяце №" + month);
+                hasErrors = true;
             }
         }
-        if (errors == false) {
-            System.out.println("Отчеты успешно сверены - расхождений в данных не обнаружено !");
-        }
-        errors = false;                                                                         // возвращаем исходное значение переменной (чтоб при повторном вызове метод)
-    }
 
+        // Выводим результат проверки
+        if (!hasErrors) {
+            System.out.println("Отчеты успешно сверены - расхождений в данных не обнаружено!");
+        }
+    }
 }

@@ -1,105 +1,130 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 
-public class YearlyReport { // класс для данных годового отчёта
+public class YearlyReport {
 
-    public ArrayList<YearReportByString> yearReport = new ArrayList<>(); // список для сохранения объектов в которых хранятся объекты класса YearReportByString
-    public HashMap<Integer, Integer> getYearLoss = new HashMap<>(); // хеш-таблица для сохранения данных по убыткам
-    public HashMap<Integer, Integer> getYearProfit = new HashMap<>(); // хеш-таблица для сохранения данных по прибыли
-    int year;
+    private final List<YearReportByString> yearReport = new ArrayList<>(); // список для хранения объектов YearReportByString
+    private final HashMap<Integer, Integer> yearLoss = new HashMap<>(); // хеш-таблица для убытков
+    private final HashMap<Integer, Integer> yearProfit = new HashMap<>(); // хеш-таблица для прибыли
+    private final int year;
 
-    public YearlyReport(int year) { // конструктор класса
+    public YearlyReport(int year) {
+        if (year < 1900 || year > 2100) {
+            throw new IllegalArgumentException("Год должен быть в диапазоне от 1900 до 2100.");
+        }
         this.year = year;
     }
 
-    public void yearlyReportLoad(String path) { // метод считывания и обработки файла, а также сохранение его значений в соответствующие объекты
-        yearReport.clear();
-        getYearLoss.clear();
-        getYearProfit.clear();
-        Reader reader = new Reader();
-        List<String> content = reader.readFileContents(path); // получаем список со строчками из файла
-        if (!content.isEmpty()) {                               // проверка загрузки файла
-            System.out.println("Загрузка файла отчета: " + path);
 
-            for (int i = 1; i < content.size(); i++) {
-                String[] yearContent = content.get(i).split(","); // получаем массив на каждую из строк (исключая нулевую строку), разделяем по запятым
-                int month = Integer.parseInt(yearContent[0]); // month [01] *******
-                int amount = Integer.parseInt(yearContent[1]); // amount [1593150]
-                boolean isExpense = Boolean.parseBoolean(yearContent[2]); // is_expense [false]
-                YearReportByString yearReportByString = new YearReportByString(month, amount, isExpense); // заполняем объект класса YearReportByString
-                yearReport.add(yearReportByString); // и сохраняем его в список
-                if (isExpense) {
-                    getYearLoss.put(month, amount); // добавляем в таблицу позиции с приходом средств
-                } else {
-                    getYearProfit.put(month, amount); // добавляем в таблицу позиции с расходом средств
-                }
+    public void yearlyReportLoad(String path) {
+        yearReport.clear();
+        yearLoss.clear();
+        yearProfit.clear();
+
+        Reader reader = new Reader();
+        List<String> content = reader.readFileContents(path); // получаем строки из файла
+
+        if (content.isEmpty()) {
+            System.out.println("Невозможно прочитать файл с годовым отчётом. Возможно файл не находится в нужной директории.");
+            return;
+        }
+
+        System.out.println("Загрузка файла отчета: " + path);
+
+        for (int i = 1; i < content.size(); i++) {
+            String[] yearContent = content.get(i).split(","); // разделяем строки по запятым
+
+            if (yearContent.length < 3) {
+                System.out.println("Ошибка: недостаточно данных в строке: " + content.get(i));
+                continue; // пропускаем строку с недостаточными данными
             }
 
-            System.out.println("Годовой отчёт успешно загружен"); // в результате считываем файл и получаем заполненный список по каждой строке из файла
-        } else {
-            System.out.println("Невозможно прочитать файл с годовым отчётом. Возможно файл не находится в нужной директории.");
+            try {
+                int month = Integer.parseInt(yearContent[0].trim()); // month
+                int amount = Integer.parseInt(yearContent[1].trim()); // amount
+                boolean isExpense = Boolean.parseBoolean(yearContent[2].trim()); // is_expense
+
+                YearReportByString yearReportByString = new YearReportByString(month, amount, isExpense);
+                yearReport.add(yearReportByString); // добавляем объект в список
+
+                if (isExpense) {
+                    yearLoss.put(month, amount); // добавляем в таблицу убытков
+                } else {
+                    yearProfit.put(month, amount); // добавляем в таблицу прибыли
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Ошибка при обработке строки: " + content.get(i) + ". " + e.getMessage());
+            }
         }
+
+        System.out.println("Годовой отчёт успешно загружен");
     }
 
     // далее методы по расчёту статистики
 
     public int getMonthLoss(int month) { // метод возвращения расходов конкретного месяца
-        return getYearLoss.getOrDefault(month, 0);
+        return yearLoss.getOrDefault(month, 0);
     }
 
     public int getMonthProfit(int month) { // метод возвращения доходов конкретного месяца
-
-        return getYearProfit.getOrDefault(month, 0);
+        return yearProfit.getOrDefault(month, 0);
     }
 
-    public int findMonthSum(int month) {     // метод нахождения прибыли за месяц (доходы минус расходы)
-
+    public int findMonthSum(int month) { // метод нахождения прибыли за месяц (доходы минус расходы
         return getMonthProfit(month) - getMonthLoss(month);
     }
 
-    public int getAveProfit() {               // метод нахождения средней прибыли за год
-        int sum = 0;
-        for (int month : getYearProfit.keySet()) {
-            sum += getYearProfit.get(month);
-        }
-        return sum / getYearProfit.size();
+    public double getAveProfit() { // метод нахождения средней прибыли за год
+        return calculateAverage(yearProfit);
     }
 
-
-    public int getAveLoss() {                 // метод нахождения среднего расхода за год
-        int sum = 0;
-        for (int month : getYearLoss.keySet()) {
-            sum += getYearLoss.get(month);
-        }
-        return sum / getYearLoss.size();
+    public double getAveLoss() { // метод нахождения среднего расхода за год
+        return calculateAverage(yearLoss);
     }
 
+    private double calculateAverage(HashMap<Integer, Integer> data) {
+        if (data.isEmpty()) return 0; // предотвращение деления на ноль
+        int sum = data.values().stream().mapToInt(Integer::intValue).sum();
+        return (double) sum / data.size(); // возвращаем среднее значение как double
+    }
 
-    public void printYearStats() {                                                       // метод для вывода статистики за год согласно ТЗ
-        if (!yearReport.isEmpty()) {                                                     // проверка, что список не пустой (файлы загружены)
-            System.out.println("Вывод статистики за " + year + " год: ");
-
-            for (int i = 1; i <= 3; i++) {                                               // в цикле указываем ожидаемое кол-во месяцев = 3
-                if (getYearLoss.get(i) == null) {                                        // доп. проверка данных по расходам за каждый месяц, отсутствие -> инф. пользователя
-                    System.out.println("В отчете за " + year + " год отсутствуют данные по расходам за " + i + " месяц.");
-                }
-                if (getYearProfit.get(i) == null) {                                      // доп. проверка данных по доходам за каждый месяц, отсутствие -> инф. пользователя
-                    System.out.println("В отчете за " + year + " год отсутствуют данные по доходам за " + i + " месяц.");
-                }
-            }
-
-            for (int i = 1; i <= 3; i++) {
-                int month = i;
-                System.out.println("Прибыль за " + month + " месяц составляет: " + findMonthSum(month) + " рублей.");
-            }
-            System.out.println("Средний расход за все месяцы в году составляет: " + getAveLoss() + " рублей.");
-            System.out.println("Средний доход за все месяцы в году составляет: " + getAveProfit() + " рублей.");
-
-
-        } else {
+    public void printYearStats() {
+        if (yearReport.isEmpty()) {
             System.out.println("Годовой отчет не загружен - считайте файл (команда 2).");
+            return; // Выходим из метода, если отчет не загружен
         }
+
+        System.out.println("Вывод статистики за " + year + " год: ");
+
+        for (int month = 1; month <= 3; month++) {
+            checkMonthData(month);
+            System.out.println("Прибыль за " + month + " месяц составляет: " + findMonthSum(month) + " рублей.");
+        }
+
+        System.out.println("Средний расход за все месяцы в году составляет: " + getAveLoss() + " рублей.");
+        System.out.println("Средний доход за все месяцы в году составляет: " + getAveProfit() + " рублей.");
+    }
+
+    private void checkMonthData(int month) {
+        if (getYearLoss().get(month) == null) {
+            System.out.println("В отчете за " + year + " год отсутствуют данные по расходам за " + month + " месяц.");
+        }
+        if (getYearProfit().get(month) == null) {
+            System.out.println("В отчете за " + year + " год отсутствуют данные по доходам за " + month + " месяц.");
+        }
+    }
+
+    public HashMap<Integer, Integer> getYearLoss() {
+        return yearLoss;
+    }
+
+    public HashMap<Integer, Integer> getYearProfit() {
+        return yearProfit;
+    }
+
+    public List<YearReportByString> getYearReport() {
+        return yearReport;
     }
 
 }

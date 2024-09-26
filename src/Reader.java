@@ -4,15 +4,27 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
-public class Reader { // класс для считывания информации из файла
+public class Reader {
 
-    public  List<String> readFileContents(String path) { // метод для считывания файла CSV в список со строками
-        try {
-            return Files.readAllLines(Path.of(path));
-        } catch (IOException e) {
-            System.out.println("Невозможно прочитать файл с месячным отчётом. Возможно файл не находится в нужной директории.");
-            System.out.println("Проверьте путь " + path);
+    /**
+     * Считывает содержимое файла по указанному пути и возвращает его в виде списка строк.
+     *
+     * @param path путь к файлу
+     * @return список строк, содержащих содержимое файла или пустой список в случае ошибки
+     */
+
+    public List<String> readFileContents(String path) {
+        Path filePath = Path.of(path); // Преобразуем строку пути в объект Path
+        if (!Files.exists(filePath)) { // Проверяем существование файла
+            System.out.println("Файл не найден: " + path);
             return Collections.emptyList();
+        }
+
+        try {
+            return Files.readAllLines(filePath); // Читаем строки из файла
+        } catch (IOException e) {
+            System.out.println("Ошибка при чтении файла: " + e.getMessage());
+            return Collections.emptyList(); // Возвращаем пустой список в случае ошибки
         }
     }
 }

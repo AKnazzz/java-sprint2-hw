@@ -1,13 +1,13 @@
-public class MonthReportByString {              // класс для хранения данных строки отчета месяца
+public class MonthReportByString {
+    // Поля класса
+    private final String itemName;      // Название товара
+    private final boolean isExpense;     // Трата (true) или доход (false)
+    private final int quantity;          // Количество закупленного или проданного товара
+    private final int sumOfOne;          // Стоимость одной единицы товара
+    private final int month;             // Номер месяца
 
-    //item_name,is_expense,quantity,sum_of_one - формат строки из отчёта - используем как параметры для класса
-    public String itemName;                     // название товара
-    public Boolean isExpense;                   // трата (TRUE) или доход (FALSE)
-    public Integer quantity;                    // количество закупленного или проданного товара
-    public Integer sumOfOne;                    // стоимость одной единицы товара
-    public Integer month;                       // добавляем данные по номеру месяца
-
-    public MonthReportByString(String itemName, Boolean isExpense, Integer quantity, Integer sumOfOne, Integer month) { // конструктор класса
+    // Конструктор класса
+    public MonthReportByString(String itemName, boolean isExpense, int quantity, int sumOfOne, int month) {
         this.itemName = itemName;
         this.isExpense = isExpense;
         this.quantity = quantity;
@@ -15,5 +15,35 @@ public class MonthReportByString {              // класс для хране�
         this.month = month;
     }
 
+    // Геттеры для доступа к полям
+    public String getItemName() {
+        return itemName;
+    }
 
+    public boolean isExpense() {
+        return isExpense;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public int getSumOfOne() {
+        return sumOfOne;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    // Метод для получения общей стоимости
+    public int getTotalCost() {
+        return quantity * sumOfOne;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Item: %s, Expense: %b, Quantity: %d, Sum of One: %d, Month: %d",
+                itemName, isExpense, quantity, sumOfOne, month);
+    }
 }
